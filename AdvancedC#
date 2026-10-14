@@ -1,0 +1,258 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+
+// Advanced C# Assignment - Questions 1 to 20
+// Choose a question number from the menu to run its example.
+internal class Program
+{
+    private static void Main()
+    {
+        while (true)
+        {
+            Console.WriteLine("\n=== Advanced C# Assignment ===");
+            Console.WriteLine("1  Reverse ArrayList in-place");
+            Console.WriteLine("2  Get even numbers");
+            Console.WriteLine("3  Count numbers greater than X (queries)");
+            Console.WriteLine("4  Check palindrome array");
+            Console.WriteLine("5  Remove duplicates from array");
+            Console.WriteLine("6  Remove odd numbers from ArrayList");
+            Console.WriteLine("7  Reverse Queue using Stack");
+            Console.WriteLine("8  Check balanced parentheses");
+            Console.WriteLine("9  Optimized Bubble Sort");
+            Console.WriteLine("10 FixedSizeList<T> - constructor/capacity");
+            Console.WriteLine("11 FixedSizeList<T> - Add");
+            Console.WriteLine("12 FixedSizeList<T> - Get");
+            Console.WriteLine("13 Range<T> - constructor");
+            Console.WriteLine("14 Range<T> - IsInRange");
+            Console.WriteLine("15 Range<T> - Length");
+            Console.WriteLine("16 Book class and BookFunctions");
+            Console.WriteLine("17 User-defined delegate");
+            Console.WriteLine("18 Built-in delegate (Func)");
+            Console.WriteLine("19 Anonymous method (GetISBN)");
+            Console.WriteLine("20 Lambda expression (GetPublicationDate)");
+            Console.WriteLine("0  Exit");
+            Console.Write("Choose question: ");
+            string? input = Console.ReadLine();
+            if (!int.TryParse(input, out int choice)) { Console.WriteLine("Please enter a valid number."); continue; }
+            if (choice == 0) break;
+
+            try
+            {
+                switch (choice)
+                {
+                    case 1: Q1(); break;
+                    case 2: Q2(); break;
+                    case 3: Q3(); break;
+                    case 4: Q4(); break;
+                    case 5: Q5(); break;
+                    case 6: Q6(); break;
+                    case 7: Q7(); break;
+                    case 8: Q8(); break;
+                    case 9: Q9(); break;
+                    case 10: Q10(); break;
+                    case 11: Q11(); break;
+                    case 12: Q12(); break;
+                    case 13: Q13(); break;
+                    case 14: Q14(); break;
+                    case 15: Q15(); break;
+                    case 16: Q16(); break;
+                    case 17: Q17(); break;
+                    case 18: Q18(); break;
+                    case 19: Q19(); break;
+                    case 20: Q20(); break;
+                    default: Console.WriteLine("Choose a number from 0 to 20."); break;
+                }
+            }
+            catch (Exception ex) { Console.WriteLine($"Error: {ex.Message}"); }
+            Console.WriteLine("\nPress Enter to return to the menu...");
+            Console.ReadLine();
+        }
+    }
+
+    private static int[] ReadIntArray(string prompt = "Enter integers separated by spaces: ")
+    {
+        Console.Write(prompt);
+        return (Console.ReadLine() ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            .Select(int.Parse).ToArray();
+    }
+
+    // Q1: Reverse an ArrayList in-place without ArrayList.Reverse().
+    private static void Q1()
+    {
+        ArrayList values = new ArrayList { 1, 2, 3, 4, 5 };
+        int left = 0, right = values.Count - 1;
+        while (left < right) { object? temp = values[left]; values[left] = values[right]; values[right] = temp; left++; right--; }
+        Console.WriteLine(string.Join(", ", values.ToArray()));
+    }
+
+    // Q2: Return only even integers.
+    private static List<int> GetEvenNumbers(List<int> numbers) => numbers.Where(n => n % 2 == 0).ToList();
+    private static void Q2() => Console.WriteLine(string.Join(", ", GetEvenNumbers(new List<int> { 1, 2, 3, 4, 5, 6 })));
+
+    // Q3: For each query X, count elements greater than X.
+    private static void Q3()
+    {
+        int[] numbers = ReadIntArray("Enter array numbers (example: 11 5 3): ");
+        int[] queries = ReadIntArray("Enter query values (example: 1 5 13): ");
+        foreach (int x in queries) Console.WriteLine(numbers.Count(n => n > x));
+    }
+
+    // Q4: Determine whether an array is a palindrome.
+    private static bool IsPalindrome(int[] values)
+    {
+        for (int i = 0; i < values.Length / 2; i++) if (values[i] != values[values.Length - 1 - i]) return false;
+        return true;
+    }
+    private static void Q4() { int[] a = ReadIntArray(); Console.WriteLine(IsPalindrome(a) ? "YES" : "NO"); }
+
+    // Q5: Remove duplicate elements while preserving their first-occurrence order.
+    private static int[] RemoveDuplicates(int[] values) => values.Distinct().ToArray();
+    private static void Q5() => Console.WriteLine(string.Join(" ", RemoveDuplicates(ReadIntArray())));
+
+    // Q6: Remove all odd numbers from an ArrayList.
+    private static void RemoveOddNumbers(ArrayList values)
+    {
+        for (int i = values.Count - 1; i >= 0; i--) if ((int)values[i]! % 2 != 0) values.RemoveAt(i);
+    }
+    private static void Q6() { ArrayList a = new ArrayList { 1, 2, 3, 4, 5, 6 }; RemoveOddNumbers(a); Console.WriteLine(string.Join(", ", a.ToArray())); }
+
+    // Q7: Reverse a queue using a stack.
+    private static Queue<T> ReverseQueue<T>(Queue<T> queue)
+    {
+        Stack<T> stack = new Stack<T>();
+        while (queue.Count > 0) stack.Push(queue.Dequeue());
+        while (stack.Count > 0) queue.Enqueue(stack.Pop());
+        return queue;
+    }
+    private static void Q7() { Queue<int> q = new Queue<int>(new[] { 1, 2, 3, 4, 5 }); ReverseQueue(q); Console.WriteLine(string.Join(", ", q)); }
+
+    // Q8: Check whether (), [], and {} are properly balanced and nested.
+    private static bool AreParenthesesBalanced(string text)
+    {
+        Stack<char> stack = new Stack<char>();
+        foreach (char c in text)
+        {
+            if (c == '(' || c == '[' || c == '{') stack.Push(c);
+            else if (c == ')' || c == ']' || c == '}')
+            {
+                if (stack.Count == 0) return false;
+                char open = stack.Pop();
+                if ((c == ')' && open != '(') || (c == ']' && open != '[') || (c == '}' && open != '{')) return false;
+            }
+        }
+        return stack.Count == 0;
+    }
+    private static void Q8() { Console.Write("Enter parentheses expression: "); Console.WriteLine(AreParenthesesBalanced(Console.ReadLine() ?? "") ? "Balanced" : "Not Balanced"); }
+
+    // Q9: Bubble sort stops early if a pass makes no swaps.
+    private static void OptimizedBubbleSort(int[] a)
+    {
+        for (int end = a.Length - 1; end > 0; end--)
+        {
+            bool swapped = false;
+            for (int i = 0; i < end; i++) if (a[i] > a[i + 1]) { (a[i], a[i + 1]) = (a[i + 1], a[i]); swapped = true; }
+            if (!swapped) break;
+        }
+    }
+    private static void Q9() { int[] a = ReadIntArray(); OptimizedBubbleSort(a); Console.WriteLine(string.Join(" ", a)); }
+
+    // Q10-Q12: One class satisfies the combined FixedSizeList<T> requirements.
+    private static void Q10() { var list = new FixedSizeList<int>(3); Console.WriteLine("Created FixedSizeList<int> with capacity 3."); }
+    private static void Q11() { var list = new FixedSizeList<int>(2); list.Add(10); list.Add(20); try { list.Add(30); } catch (InvalidOperationException ex) { Console.WriteLine(ex.Message); } }
+    private static void Q12() { var list = new FixedSizeList<string>(2); list.Add("first"); list.Add("second"); Console.WriteLine(list.Get(1)); try { Console.WriteLine(list.Get(5)); } catch (ArgumentOutOfRangeException ex) { Console.WriteLine(ex.Message); } }
+
+    private static void Q13() { var range = new Range<int>(3, 10); Console.WriteLine($"Range created: {range.Minimum} to {range.Maximum}"); }
+    private static void Q14() { var range = new Range<int>(3, 10); Console.WriteLine(range.IsInRange(7)); Console.WriteLine(range.IsInRange(12)); }
+    private static void Q15() { var range = new Range<int>(3, 10); Console.WriteLine($"Length = {range.Length()}"); }
+
+    private static List<Book> SampleBooks() => new List<Book>
+    {
+        new Book("978-1", "C# Basics", new[] { "A. Writer", "B. Writer" }, new DateTime(2022, 1, 15), 250m),
+        new Book("978-2", "Advanced C#", new[] { "C. Author" }, new DateTime(2024, 5, 20), 400m)
+    };
+    private static void Q16()
+    {
+        Book book = SampleBooks()[0];
+        Console.WriteLine(book);
+        Console.WriteLine(BookFunctions.GetTitle(book));
+        Console.WriteLine(BookFunctions.GetAuthors(book));
+        Console.WriteLine(BookFunctions.GetPrice(book));
+    }
+    private delegate string BookFunction(Book book); // Q17: user-defined delegate with matching signature.
+    private static void ProcessBooks(List<Book> books, BookFunction function)
+    { foreach (Book book in books) Console.WriteLine(function(book)); }
+    private static void Q17() => ProcessBooks(SampleBooks(), BookFunctions.GetTitle);
+
+    // Q18: Func<Book, string> is the appropriate built-in delegate.
+    private static void ProcessBooksBuiltIn(List<Book> books, Func<Book, string> function)
+    { foreach (Book book in books) Console.WriteLine(function(book)); }
+    private static void Q18() => ProcessBooksBuiltIn(SampleBooks(), BookFunctions.GetAuthors);
+
+    // Q19: Anonymous method for GetISBN.
+    private static void Q19() => ProcessBooksBuiltIn(SampleBooks(), delegate (Book b) { return b.ISBN; });
+
+    // Q20: Lambda expression for publication date.
+    private static void Q20() => ProcessBooksBuiltIn(SampleBooks(), b => b.PublicationDate.ToShortDateString());
+}
+
+public class FixedSizeList<T>
+{
+    private readonly List<T> _items = new List<T>();
+    public int Capacity { get; }
+    public int Count => _items.Count;
+    public FixedSizeList(int capacity)
+    {
+        if (capacity < 0) throw new ArgumentOutOfRangeException(nameof(capacity), "Capacity cannot be negative.");
+        Capacity = capacity;
+    }
+    public void Add(T item)
+    {
+        if (_items.Count >= Capacity) throw new InvalidOperationException("The list is full; cannot add more elements.");
+        _items.Add(item);
+    }
+    public T Get(int index)
+    {
+        if (index < 0 || index >= _items.Count) throw new ArgumentOutOfRangeException(nameof(index), "Index is outside the list's current elements.");
+        return _items[index];
+    }
+}
+
+public class Range<T> where T : IComparable<T>
+{
+    public T Minimum { get; }
+    public T Maximum { get; }
+    public Range(T minimum, T maximum)
+    {
+        if (minimum.CompareTo(maximum) > 0) throw new ArgumentException("Minimum must be less than or equal to maximum.");
+        Minimum = minimum; Maximum = maximum;
+    }
+    public bool IsInRange(T value) => value.CompareTo(Minimum) >= 0 && value.CompareTo(Maximum) <= 0;
+    // Length is meaningful for numeric T values; dynamic subtraction supports common numeric types.
+    public dynamic Length() => (dynamic)Maximum! - (dynamic)Minimum!;
+}
+
+public class Book
+{
+    public string ISBN { get; set; }
+    public string Title { get; set; }
+    public string[] Authors { get; set; }
+    public DateTime PublicationDate { get; set; }
+    public decimal Price { get; set; }
+
+    public Book(string _ISBN, string _Title, string[] _Authors, DateTime _PublicationDate, decimal _Price)
+    {
+        ISBN = _ISBN; Title = _Title; Authors = _Authors; PublicationDate = _PublicationDate; Price = _Price;
+    }
+    public override string ToString() => $"ISBN: {ISBN}, Title: {Title}, Authors: {string.Join(", ", Authors)}, Published: {PublicationDate:yyyy-MM-dd}, Price: {Price:C}";
+}
+
+public class BookFunctions
+{
+    public static string GetTitle(Book b) => b.Title;
+    public static string GetAuthors(Book b) => string.Join(", ", b.Authors);
+    public static string GetPrice(Book b) => b.Price.ToString("F2");
+    public static string GetISBN(Book b) => b.ISBN;
+    public static string GetPublicationDate(Book b) => b.PublicationDate.ToShortDateString();
+}
